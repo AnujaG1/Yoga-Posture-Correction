@@ -32,8 +32,18 @@ pose = mp_pose.Pose(static_image_mode=True, min_detection_confidence=0.5, model_
 pose_video = mp_pose.Pose(static_image_mode=False, min_detection_confidence=0.5, model_complexity=1)
 mp_drawing = mp.solutions.drawing_utils
 
+def get_working_camera_index():
+    for i in range(4):
+        camera=cv2.VideoCapture(i)
+        if camera.isOpened():
+            print(f"Camera found at index {i}")
+            return i
+        camera.release()
+
+    raise Exception("Camera is not working!")
 # Camera
-camera = cv2.VideoCapture(0)
+index = get_working_camera_index()
+camera = cv2.VideoCapture(index)
 
 def record(out):
     global rec_frame
@@ -65,43 +75,57 @@ def detect_face(frame):
         pass
     return frame
 
-# Dummy placeholder for pose detection and classification (implement later)
-def detectPose(frame, pose_model, display=False):
-    return frame, True  # Simulate detection
-
-def classifyPose(landmarks, frame, display=False):
-    return frame, 'Pose Name'  # Simulate classification
-
+ 
 def gen_frames():
     global out, capture, rec_frame
     while True:
         success, frame = camera.read() 
         if success:
-            if face:
-                frame = detect_face(frame)
-            if grey:
+            if(face):                
+                frame= detect_face(frame)
+            if(grey):
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            
             frame = cv2.flip(frame, 1)
-            frame, landmarks = detectPose(frame, pose_video, display=False)
+            frame, landmarks = detectPose(frame, pose_video, display=False) 
             if landmarks:
-                frame, _ = classifyPose(landmarks, frame, display=False)
+                # Perform the Pose Classification and get corrections and angles
+                frame, label, corrections, angle_display = classifyPose(landmarks, frame, display=False)
+                
+                # Display angles on the right side
+                for i, angle in enumerate(angle_display[:6]):
+                    cv2.putText(frame, angle, (frame.shape[1] - 200, 30 + i*30),
+                                cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255), 2)
+                
+                # Display corrections
+                for i, correction in enumerate(corrections[:3]):
+                    cv2.putText(frame, correction, (10, 70 + i*30),
+                                cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 255), 2)
+                
                 frame = cv2.flip(frame, 1)
-            if capture:
-                capture = 0
+
+            
+            if(capture):
+                capture=0
                 now = datetime.datetime.now()
-                p = os.path.sep.join(['shots', f"shot_{str(now).replace(':','')}.png"])
+                p = os.path.sep.join(['shots', "shot_{}.png".format(str(now).replace(":",''))])
                 cv2.imwrite(p, frame)
-            if rec:
-                rec_frame = frame
-                frame = cv2.putText(cv2.flip(frame, 1), "Recording...", (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 4)
-                frame = cv2.flip(frame, 1)
+            
+            if(rec):
+                rec_frame=frame
+                frame= cv2.putText(cv2.flip(frame,1),"Recording...", (0,25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255),4)
+                frame=cv2.flip(frame,1)
+            
             try:
-                ret, buffer = cv2.imencode('.jpg', cv2.flip(frame, 1))
+                ret, buffer = cv2.imencode('.jpg', cv2.flip(frame,1))
                 frame = buffer.tobytes()
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-            except Exception:
+            except Exception as e:
                 pass
+        else:
+            pass
+
 
 # ROUTES
 @app.route('/')
