@@ -1,45 +1,55 @@
-from flask import Flask, render_template, Response, request, redirect, url_for, flash
+from flask import Flask, render_template, Response, request
 import cv2
 import datetime, time
-import os
+import os, sys
 import mediapipe as mp
 import numpy as np
 from threading import Thread
 from detectPose import detectPose
 from classifyPose import classifyPose
 
-# Flask setup
-app = Flask(__name__, template_folder='./templates')
-app.secret_key = 'secret_key_for_flask_flash_messages'
 
-# Global variables
-capture = 0
-grey = 0
-neg = 0
-face = 0
-switch = 1
-rec = 0
+global capture,rec_frame, grey, switch, neg, face, rec, out 
+capture=0
+grey=0
+neg=0
+face=0
+switch=1
+rec=0
 
-# Make shots directory to save pics
+#make shots directory to save pics
 try:
     os.mkdir('./shots')
-except OSError:
+except OSError as error:
     pass
 
-# MediaPipe Pose
+#Load pretrained face detection model    
+#net = cv2.dnn.readNetFromCaffe('./saved_model/deploy.prototxt.txt', './saved_model/res10_300x300_ssd_iter_140000.caffemodel')
+
+#instatiate flask app  
+app = Flask(__name__, template_folder='./templates')
+
+# Initializing mediapipe pose class.
 mp_pose = mp.solutions.pose
-pose = mp_pose.Pose(static_image_mode=True, min_detection_confidence=0.5, model_complexity=2)
-pose_video = mp_pose.Pose(static_image_mode=False, min_detection_confidence=0.5, model_complexity=1)
+
+# Setting up the Pose function.
+pose = mp_pose.Pose(static_image_mode=True,
+                    min_detection_confidence=0.5, model_complexity=2)
+
+# Initializing mediapipe drawing class, useful for annotation.
 mp_drawing = mp.solutions.drawing_utils
 
-# Camera
+
+# Setup Pose function for video.
+pose_video = mp_pose.Pose(static_image_mode=False, min_detection_confidence=0.5, model_complexity=1)
 camera = cv2.VideoCapture(0)
 
 def record(out):
     global rec_frame
-    while rec:
+    while(rec):
         time.sleep(0.05)
         out.write(rec_frame)
+
 
 def detect_face(frame):
     global net
@@ -51,57 +61,61 @@ def detect_face(frame):
     confidence = detections[0, 0, 0, 2]
 
     if confidence < 0.5:            
-        return frame
+            return frame           
 
     box = detections[0, 0, 0, 3:7] * np.array([w, h, w, h])
     (startX, startY, endX, endY) = box.astype("int")
     try:
-        frame = frame[startY:endY, startX:endX]
+        frame=frame[startY:endY, startX:endX]
         (h, w) = frame.shape[:2]
         r = 480 / float(h)
-        dim = (int(w * r), 480)
-        frame = cv2.resize(frame, dim)
-    except Exception:
+        dim = ( int(w * r), 480)
+        frame=cv2.resize(frame,dim)
+    except Exception as e:
         pass
     return frame
+ 
 
-# Dummy placeholder for pose detection and classification (implement later)
-def detectPose(frame, pose_model, display=False):
-    return frame, True  # Simulate detection
-
-def classifyPose(landmarks, frame, display=False):
-    return frame, 'Pose Name'  # Simulate classification
-
-def gen_frames():
-    global out, capture, rec_frame
+def gen_frames():  # generate frame by frame from camera
+    global out, capture,rec_frame
     while True:
         success, frame = camera.read() 
         if success:
-            if face:
-                frame = detect_face(frame)
-            if grey:
+            if(face):                
+                frame= detect_face(frame)
+            if(grey):
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        #    if(open):
+        #     Flip the frame horizontally for natural (selfie-view) visualization.
             frame = cv2.flip(frame, 1)
-            frame, landmarks = detectPose(frame, pose_video, display=False)
+            frame, landmarks = detectPose(frame, pose_video, display=False) 
             if landmarks:
-                frame, _ = classifyPose(landmarks, frame, display=False)
-                frame = cv2.flip(frame, 1)
-            if capture:
-                capture = 0
+            # Perform the Pose Classification.
+                  frame, _ = classifyPose(landmarks, frame, display=False)
+                  frame=cv2.flip(frame,1)   
+            if(capture):
+                capture=0
                 now = datetime.datetime.now()
-                p = os.path.sep.join(['shots', f"shot_{str(now).replace(':','')}.png"])
+                p = os.path.sep.join(['shots', "shot_{}.png".format(str(now).replace(":",''))])
                 cv2.imwrite(p, frame)
-            if rec:
-                rec_frame = frame
-                frame = cv2.putText(cv2.flip(frame, 1), "Recording...", (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 4)
-                frame = cv2.flip(frame, 1)
+            
+            if(rec):
+                rec_frame=frame
+                frame= cv2.putText(cv2.flip(frame,1),"Recording...", (0,25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255),4)
+                frame=cv2.flip(frame,1)
+            
+                
             try:
-                ret, buffer = cv2.imencode('.jpg', cv2.flip(frame, 1))
+                ret, buffer = cv2.imencode('.jpg', cv2.flip(frame,1))
                 frame = buffer.tobytes()
                 yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-            except Exception:
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            except Exception as e:
                 pass
+                
+        else:
+            pass
+
 
 # ROUTES
 @app.route('/')
@@ -127,8 +141,6 @@ def about():
 @app.route('/blog')
 def blog():
     return render_template('blog.html')
-
-
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -158,42 +170,55 @@ def signup():
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/requests', methods=['POST', 'GET'])
+@app.route('/requests',methods=['POST','GET'])
 def tasks():
-    global switch, camera, capture, grey, neg, face, rec, out
+    global switch,camera
     if request.method == 'POST':
         if request.form.get('click') == 'Capture':
-            capture = 1
-        elif request.form.get('grey') == 'Grey':
-            grey = not grey
-        elif request.form.get('open') == 'Open':
-            neg = not neg
-        elif request.form.get('face') == 'Face Only':
-            face = not face
-            if face:
-                time.sleep(4)
-        elif request.form.get('start') == 'Stop/Start':
-            if switch == 1:
+            global capture
+            capture=1
+        elif  request.form.get('grey') == 'Grey':
+            global grey
+            grey=not grey
+        if  request.form.get('open') == 'Open':
+            global neg
+            neg=not neg
+        elif  request.form.get('face') == 'Face Only':
+            global face
+            face=not face 
+            if(face):
+                time.sleep(4)   
+        elif  request.form.get('start') == 'Stop/Start':
+            
+            if(switch==1):
+                
                 camera = cv2.VideoCapture(0)
-                switch = 0
+                switch=0
+                
+                
             else:
-                switch = 1
+                switch=1
                 camera.release()
                 cv2.destroyAllWindows()
-        elif request.form.get('rec') == 'Start/Stop Recording':
-            rec = not rec
-            if rec:
-                now = datetime.datetime.now()
+        elif  request.form.get('rec') == 'Start/Stop Recording':
+            global rec, out
+            rec= not rec
+            if(rec):
+                now=datetime.datetime.now() 
                 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-                out = cv2.VideoWriter(f'vid_{str(now).replace(":", "")}.avi', fourcc, 20.0, (640, 480))
-                thread = Thread(target=record, args=[out])
+                out = cv2.VideoWriter('vid_{}.avi'.format(str(now).replace(":",'')), fourcc, 20.0, (640, 480))
+                #Start new thread for recording the video
+                thread = Thread(target = record, args=[out,])
                 thread.start()
-            else:
+            elif(rec==False):
                 out.release()
+            
+    elif request.method=='GET':
+        return render_template('index.html')
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
-
+    app.run()
+    
 camera.release()
-cv2.destroyAllWindows()
+cv2.destroyAllWindows()  
