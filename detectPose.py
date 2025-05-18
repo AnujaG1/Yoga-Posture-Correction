@@ -1,6 +1,9 @@
 import cv2
 import matplotlib.pyplot as plt
 import mediapipe as mp
+import threading
+import time
+
 
 # Initializing mediapipe pose class.
 mp_pose = mp.solutions.pose
@@ -43,6 +46,8 @@ def detectPose(image, pose, display=True):
             # Append the landmark into the list.
             landmarks.append((int(landmark.x * width), int(landmark.y * height),
                               (landmark.z * width)))
+            
+    
 
     # Check if the original input image and the resultant image are specified to be displayed.
     if display:

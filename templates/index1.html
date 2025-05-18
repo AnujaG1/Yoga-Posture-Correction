@@ -57,5 +57,108 @@
             </div>
         </div>
     </div>
+  <!-- Chatbot Trigger Button -->
+<div id="chatbot-button" onclick="toggleChatbot()">💬</div>
+
+<!-- Chatbot Container (Hidden by Default) -->
+<div id="chatbot-container" style="display: none;">
+    <div id="chat-header">Ask me anything about Yoga!</div>
+    <div id="chat-box"></div>
+    <input type="text" id="user-input" placeholder="Type your question...">
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<!-- CSS -->
+<style>
+#chatbot-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #bd72cf;
+    color: white;
+    padding: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    z-index: 1000;
+}
+
+#chatbot-container {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 300px;
+    background: white;
+    border: 2px solid #ccc;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+    font-family: Montserrat;
+    z-index: 999;
+}
+
+#chat-header {
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#chat-box {
+    height: 200px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    padding: 5px;
+    margin-bottom: 10px;
+}
+
+#chat-box div {
+    margin: 5px 0;
+}
+
+#user-input {
+    width: 70%;
+    padding: 5px;
+}
+
+button {
+    padding: 5px 10px;
+    background-color: #cf5bac;
+    color: white;
+    border: none;
+    border-radius: 4px;
+}
+</style>
+
+<!-- JavaScript -->
+<script>
+function toggleChatbot() {
+    var container = document.getElementById("chatbot-container");
+    container.style.display = (container.style.display === "none") ? "block" : "none";
+}
+
+function sendMessage() {
+    let userInput = document.getElementById("user-input").value;
+    if (!userInput.trim()) return;
+
+    let chatBox = document.getElementById("chat-box");
+    chatBox.innerHTML += "<div><strong>You:</strong> " + userInput + "</div>";
+
+    fetch("/chatbot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userInput })
+    })
+    .then(response => response.json())
+    .then(data => {
+        chatBox.innerHTML += "<div><strong>Bot:</strong> " + data.reply + "</div>";
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+    document.getElementById("user-input").value = "";
+}
+</script>
+
+
 </body>
 </html>

@@ -173,40 +173,7 @@ body {
     text-align: center;
     color: #fff;
 }
-.blog-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    margin-bottom: 30px;
-    padding: 20px;
-}
 
-.contact-form {
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    max-width: 600px;
-    margin: 0 auto;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.contact-form input, .contact-form textarea {
-    width: 100%;
-    margin-top: 15px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-}
-
-.contact-form button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    background: #9575cd;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-}
 .back-btn {
     display: inline-block;
     margin-bottom: 20px;
