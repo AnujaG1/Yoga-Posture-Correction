@@ -23,8 +23,6 @@ try:
 except OSError as error:
     pass
 
-#Load pretrained face detection model    
-#net = cv2.dnn.readNetFromCaffe('./saved_model/deploy.prototxt.txt', './saved_model/res10_300x300_ssd_iter_140000.caffemodel')
 
 #instatiate flask app  
 app = Flask(__name__, template_folder='./templates')
@@ -43,6 +41,8 @@ mp_drawing = mp.solutions.drawing_utils
 # Setup Pose function for video.
 pose_video = mp_pose.Pose(static_image_mode=False, min_detection_confidence=0.5, model_complexity=1)
 camera = cv2.VideoCapture(0)
+camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)   # Set width
+camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
 def record(out):
     global rec_frame
@@ -54,7 +54,7 @@ def record(out):
 def detect_face(frame):
     global net
     (h, w) = frame.shape[:2]
-    blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0,
+    blob = cv2.dnn.blobFromImage(cv2.resize(frame, (500, 500)), 1.0,
         (300, 300), (104.0, 177.0, 123.0))   
     net.setInput(blob)
     detections = net.forward()
@@ -162,7 +162,7 @@ def signup():
         print(f"Yoga Experience Level: {experience}")
 
         flash('Signup successful!')
-        return redirect(url_for('index1'))
+        return render_template('index1')
 
     return render_template('signup.html')
 

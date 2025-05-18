@@ -1,7 +1,7 @@
 import mediapipe as mp
 import matplotlib.pyplot as plt
 import cv2
-# from calculateAngle import calculateAngle
+
 
 # Initializing mediapipe pose class.
 mp_pose = mp.solutions.pose
