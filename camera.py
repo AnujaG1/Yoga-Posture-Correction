@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Response, request
+from flask import Flask, render_template, Response, request, jsonify
 import cv2
 import datetime, time
 import os, sys
@@ -169,6 +169,22 @@ def signup():
 @app.route('/video_feed')
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/chatbot', methods=['POST'])
+def chatbot():
+    user_message = request.json.get("message", "").lower()
+
+    responses = {
+        "what is yoga": "Yoga is a physical, mental, and spiritual practice that originated in ancient India.",
+        "benefits of yoga": "Yoga improves flexibility, builds strength, reduces stress, and boosts mental clarity.",
+        "how often should I do yoga": "Even 10-20 minutes daily can be beneficial!",
+        "what's the best pose for beginners": "The Mountain Pose and Child’s Pose are great for beginners.",
+        "namaste": "Namaste! How can I help you with yoga today?",
+    }
+
+    # Default response if question not found
+    reply = responses.get(user_message.strip(), "I'm still learning! Please ask something else about yoga.")
+    return jsonify({"reply": reply}) 
 
 @app.route('/requests',methods=['POST','GET'])
 def tasks():
