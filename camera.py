@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Response, request, jsonify
+from flask import Flask, render_template, Response, request, jsonify, flash
 import cv2
 import datetime, time
 import os, sys
@@ -42,7 +42,7 @@ mp_drawing = mp.solutions.drawing_utils
 pose_video = mp_pose.Pose(static_image_mode=False, min_detection_confidence=0.5, model_complexity=1)
 camera = cv2.VideoCapture(0)
 camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)   # Set width
-camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 750)
 
 def record(out):
     global rec_frame
@@ -130,9 +130,6 @@ def index1():
 def demo():
     return render_template('demo.html')
 
-@app.route('/contact')
-def contact():
-    return render_template('contact.html')
 
 @app.route('/about')
 def about():
@@ -141,6 +138,11 @@ def about():
 @app.route('/blog')
 def blog():
     return render_template('blog.html')
+
+@app.route("/contact")
+def contact():
+    return render_template("contact.html")
+
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -215,7 +217,9 @@ def submit_contact():
         <div class="thank-you-box">
             <h1>Thank You, {name}!</h1>
             <p>Your message has been received. We'll get back to you soon.</p>
-            <a href="/">← Back to Home</a>
+           <div style="text-align: center; margin: 20px;">
+        <a href="{{ url_for('index') }}" class="back-btn">← Back to Home</a>
+    </div>
         </div>
     </body>
     </html>

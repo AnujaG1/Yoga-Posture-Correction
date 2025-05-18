@@ -4,90 +4,75 @@
     <meta charset="UTF-8">
     <title>About Yoga</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
-   
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         body {
-            font-family: 'Montserrat', sans-serif;
-            margin: 0;
             background: linear-gradient(135deg, #e8d1f3, #f6d7e0, #d0f0f6);
-        }
-
-        .nav {
-            background-color: #2c3e50;
-            padding: 10px 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            list-style: none;
-            margin: 0;
-        }
-
-        .nav li {
-            margin: 0 20px;
-        }
-
-        .nav a {
-            text-decoration: none;
-            color: white;
-            font-weight: bold;
-        }
-
-        .nav .active {
-            color: #f39c12;
-        }
-
-        .signupBtn {
-            background-color: #f39c12;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 5px;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 20px;
-            background: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            border-radius: 12px;
         }
 
         h1 {
             text-align: center;
             color: #2c3e50;
-            margin-bottom: 30px;
+            font-size: 2.5em;
+            margin-bottom: 40px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
 
         .pose {
             display: flex;
             flex-wrap: wrap;
-            margin-bottom: 30px;
+            margin-bottom: 50px;
             align-items: center;
         }
 
         .pose img {
-            max-width: 300px;
             width: 100%;
-            border-radius: 8px;
-            margin-right: 20px;
+            max-width: 320px;
+            border-radius: 15px;
+            margin: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .pose-description {
+            flex: 1;
+            padding: 0 20px;
+        }
+
+        .pose-description h2 {
+            color: #f39c12;
+            margin-bottom: 10px;
+        }
+
+        .pose-description p {
+            color: #333;
+            font-size: 1.05em;
+            line-height: 1.6;
         }
 
         .pose:nth-child(even) {
             flex-direction: row-reverse;
         }
 
-        .pose-description {
-            flex: 1;
+        .back-btn {
+            background-color: #f39c12;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
         }
 
-        .pose-description h2 {
-            color: #f39c12;
-            margin-top: 0;
-        }
-
-        .pose-description p {
-            color: #444;
-            line-height: 1.6;
+        .back-btn:hover {
+            background-color: #e67e22;
         }
 
         @media screen and (max-width: 768px) {
@@ -96,28 +81,25 @@
                 text-align: center;
             }
 
-            .pose img {
-                margin: 0 0 20px 0;
+            .pose-description {
+                padding: 0;
             }
         }
     </style>
-     
 </head>
 <body>
-   
 
     <div class="container">
         <h1>Discover the Power of Yoga</h1>
 
+        <!-- All Yoga Poses -->
         <div class="pose">
-            <img src="/static/Halasana.jpeg" >
+            <img src="/static/Halasana.jpeg">
             <div class="pose-description">
                 <h2>Halasana</h2>
-                <p>Halasana is a powerful pose that stretches the spine and shoulders, calms the nervous system, and improves flexibility. It helps stimulate the thyroid gland, improves digestion, and relieves stress and fatigue. To perform this pose, lie on your back and gently raise your legs over your head, allowing your toes to touch the floor behind you, while keeping your hands on the ground or supporting your back.</p>
+                <p>Halasana is a powerful pose that stretches the spine and shoulders, calms the nervous system, and improves flexibility. It helps stimulate the thyroid gland, improves digestion, and relieves stress and fatigue.</p>
             </div>
         </div>
-
-    
 
         <div class="pose">
             <img src="/static/treePose.jpeg" alt="Tree Pose">
@@ -126,48 +108,44 @@
                 <p>Vrikshasana improves balance and stability in the legs, and helps strengthen the thighs, calves, and spine. It also enhances your concentration and mindfulness while promoting a sense of grounding.</p>
             </div>
         </div>
-        <!-- T-Pose -->
-<div class="pose">
-    <img src="/static/TPose.jpeg" alt="T-Pose">
-    <div class="pose-description">
-        <h2>T-Pose (Standing Balance Pose)</h2>
-        <p>The T-Pose is a simple yet powerful standing posture that improves posture, strengthens the arms and back, and brings awareness to body alignment. With arms extended outwards in a straight line forming a 'T', this pose is also used in warm-up routines to build body stability and presence.</p>
+
+        <div class="pose">
+            <img src="/static/TPose.jpeg" alt="T-Pose">
+            <div class="pose-description">
+                <h2>T-Pose (Standing Balance Pose)</h2>
+                <p>The T-Pose is a simple yet powerful standing posture that improves posture, strengthens the arms and back, and brings awareness to body alignment.</p>
+            </div>
+        </div>
+
+        <div class="pose">
+            <img src="/static/savasana.jpg" alt="Savasana Pose">
+            <div class="pose-description">
+                <h2>Savasana (Corpse Pose)</h2>
+                <p>Savasana is a restorative pose usually practiced at the end of a yoga session. It promotes deep relaxation and mental stillness.</p>
+            </div>
+        </div>
+
+        <div class="pose">
+            <img src="/static/peacockPose.jpeg" alt="Peacock Pose">
+            <div class="pose-description">
+                <h2>Peacock Pose (Mayurasana)</h2>
+                <p>Mayurasana is an advanced arm balance pose that symbolizes strength and grace. It strengthens the wrists, forearms, and core muscles.</p>
+            </div>
+        </div>
+
+        <div class="pose">
+            <img src="/static/camelPose.jpeg" alt="Camel Pose">
+            <div class="pose-description">
+                <h2>Camel Pose (Ustrasana)</h2>
+                <p>Ustrasana is a deep backbend that stretches the front body and improves spinal flexibility while stimulating the respiratory system.</p>
+            </div>
+        </div>
     </div>
-</div>
 
-<!-- Savasana -->
-<div class="pose">
-    <img src="/static/savasana.jpg" alt="Savasana Pose">
-    <div class="pose-description">
-        <h2>Savasana (Corpse Pose)</h2>
-        <p>Savasana is a restorative pose usually practiced at the end of a yoga session. It promotes deep relaxation and mental stillness. The practitioner lies flat on the back with arms and legs comfortably apart, eyes closed, and breath natural. It's essential for integrating the benefits of a yoga practice and calming the nervous system.</p>
-    </div>
-</div>
-
-<!-- Peacock Pose -->
-<div class="pose">
-    <img src="/static/peacockPose.jpeg" alt="Peacock Pose">
-    <div class="pose-description">
-        <h2>Peacock Pose (Mayurasana)</h2>
-        <p>Mayurasana is an advanced arm balance pose that symbolizes strength and grace. It involves balancing the body horizontally on the arms while the elbows press into the abdomen. This pose strengthens the wrists, forearms, and core muscles, and is believed to detoxify the digestive system.</p>
-    </div>
-</div>
-
-<!-- Camel Pose -->
-<div class="pose">
-    <img src="/static/camelPose.jpeg" alt="Camel Pose">
-    <div class="pose-description">
-        <h2>Camel Pose (Ustrasana)</h2>
-        <p>Ustrasana is a deep backbend that stretches the entire front body, including the chest, abdomen, and quadriceps. It improves spinal flexibility and posture while stimulating the respiratory system. Practicing this pose opens the heart center and helps release emotional tension.</p>
-    </div>
-</div>
-
-
-    </div>
-  
-
-    <div style="text-align: center; margin: 20px;">
+    <div style="text-align: center; margin: 30px;">
         <a href="{{ url_for('index') }}" class="back-btn">← Back to Home</a>
     </div>
+
 </body>
 </html>
+
