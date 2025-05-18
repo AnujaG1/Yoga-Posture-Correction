@@ -1,0 +1,199 @@
+from flask import Flask, render_template, Response, request, redirect, url_for, flash
+import cv2
+import datetime, time
+import os
+import mediapipe as mp
+import numpy as np
+from threading import Thread
+from detectPose import detectPose
+from classifyPose import classifyPose
+
+# Flask setup
+app = Flask(__name__, template_folder='./templates')
+app.secret_key = 'secret_key_for_flask_flash_messages'
+
+# Global variables
+capture = 0
+grey = 0
+neg = 0
+face = 0
+switch = 1
+rec = 0
+
+# Make shots directory to save pics
+try:
+    os.mkdir('./shots')
+except OSError:
+    pass
+
+# MediaPipe Pose
+mp_pose = mp.solutions.pose
+pose = mp_pose.Pose(static_image_mode=True, min_detection_confidence=0.5, model_complexity=2)
+pose_video = mp_pose.Pose(static_image_mode=False, min_detection_confidence=0.5, model_complexity=1)
+mp_drawing = mp.solutions.drawing_utils
+
+# Camera
+camera = cv2.VideoCapture(0)
+
+def record(out):
+    global rec_frame
+    while rec:
+        time.sleep(0.05)
+        out.write(rec_frame)
+
+def detect_face(frame):
+    global net
+    (h, w) = frame.shape[:2]
+    blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0,
+        (300, 300), (104.0, 177.0, 123.0))   
+    net.setInput(blob)
+    detections = net.forward()
+    confidence = detections[0, 0, 0, 2]
+
+    if confidence < 0.5:            
+        return frame
+
+    box = detections[0, 0, 0, 3:7] * np.array([w, h, w, h])
+    (startX, startY, endX, endY) = box.astype("int")
+    try:
+        frame = frame[startY:endY, startX:endX]
+        (h, w) = frame.shape[:2]
+        r = 480 / float(h)
+        dim = (int(w * r), 480)
+        frame = cv2.resize(frame, dim)
+    except Exception:
+        pass
+    return frame
+
+# Dummy placeholder for pose detection and classification (implement later)
+def detectPose(frame, pose_model, display=False):
+    return frame, True  # Simulate detection
+
+def classifyPose(landmarks, frame, display=False):
+    return frame, 'Pose Name'  # Simulate classification
+
+def gen_frames():
+    global out, capture, rec_frame
+    while True:
+        success, frame = camera.read() 
+        if success:
+            if face:
+                frame = detect_face(frame)
+            if grey:
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            frame = cv2.flip(frame, 1)
+            frame, landmarks = detectPose(frame, pose_video, display=False)
+            if landmarks:
+                frame, _ = classifyPose(landmarks, frame, display=False)
+                frame = cv2.flip(frame, 1)
+            if capture:
+                capture = 0
+                now = datetime.datetime.now()
+                p = os.path.sep.join(['shots', f"shot_{str(now).replace(':','')}.png"])
+                cv2.imwrite(p, frame)
+            if rec:
+                rec_frame = frame
+                frame = cv2.putText(cv2.flip(frame, 1), "Recording...", (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 4)
+                frame = cv2.flip(frame, 1)
+            try:
+                ret, buffer = cv2.imencode('.jpg', cv2.flip(frame, 1))
+                frame = buffer.tobytes()
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            except Exception:
+                pass
+
+# ROUTES
+@app.route('/')
+def index():
+    return render_template('index1.html')
+
+@app.route('/index1')
+def index1():
+    return render_template('index1.html')
+
+@app.route('/demo')
+def demo():
+    return render_template('demo.html')
+
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/blog')
+def blog():
+    return render_template('blog.html')
+
+
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        age = request.form['age']
+        weight = request.form['weight']
+        experience = request.form['experience']
+
+        # Log user data (can be saved to database later)
+        print("Signup Data Received:")
+        print(f"Username: {username}")
+        print(f"Email: {email}")
+        print(f"Password: {password}")
+        print(f"Age: {age}")
+        print(f"Weight: {weight} kg")
+        print(f"Yoga Experience Level: {experience}")
+
+        flash('Signup successful!')
+        return redirect(url_for('index1'))
+
+    return render_template('signup.html')
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/requests', methods=['POST', 'GET'])
+def tasks():
+    global switch, camera, capture, grey, neg, face, rec, out
+    if request.method == 'POST':
+        if request.form.get('click') == 'Capture':
+            capture = 1
+        elif request.form.get('grey') == 'Grey':
+            grey = not grey
+        elif request.form.get('open') == 'Open':
+            neg = not neg
+        elif request.form.get('face') == 'Face Only':
+            face = not face
+            if face:
+                time.sleep(4)
+        elif request.form.get('start') == 'Stop/Start':
+            if switch == 1:
+                camera = cv2.VideoCapture(0)
+                switch = 0
+            else:
+                switch = 1
+                camera.release()
+                cv2.destroyAllWindows()
+        elif request.form.get('rec') == 'Start/Stop Recording':
+            rec = not rec
+            if rec:
+                now = datetime.datetime.now()
+                fourcc = cv2.VideoWriter_fourcc(*'XVID')
+                out = cv2.VideoWriter(f'vid_{str(now).replace(":", "")}.avi', fourcc, 20.0, (640, 480))
+                thread = Thread(target=record, args=[out])
+                thread.start()
+            else:
+                out.release()
+    return render_template('index.html')
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+camera.release()
+cv2.destroyAllWindows()
