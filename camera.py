@@ -166,6 +166,63 @@ def signup():
 
     return render_template('signup.html')
 
+@app.route('/submit_contact', methods=['POST'])
+def submit_contact():
+    name = request.form['name']
+    email = request.form['email']
+    message = request.form['message']
+
+    print(f"Contact received: {name}, {email}, {message}")
+
+    return f'''
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <title>Thank You</title>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                background-color: #f9f9f9;
+                margin: 0;
+                padding: 0;
+            }}
+            .thank-you-box {{
+                max-width: 500px;
+                margin: 100px auto;
+                padding: 30px;
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+                text-align: center;
+            }}
+            h1 {{
+                color: #4CAF50;
+            }}
+            p {{
+                margin-top: 10px;
+                color: #555;
+            }}
+            a {{
+                display: inline-block;
+                margin-top: 20px;
+                color: #007bff;
+                text-decoration: none;
+                font-weight: bold;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="thank-you-box">
+            <h1>Thank You, {name}!</h1>
+            <p>Your message has been received. We'll get back to you soon.</p>
+            <a href="/">← Back to Home</a>
+        </div>
+    </body>
+    </html>
+    '''
+
+
+
 @app.route('/video_feed')
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')

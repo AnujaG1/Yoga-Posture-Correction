@@ -1,32 +1,8 @@
 import cv2
 import matplotlib.pyplot as plt
 import mediapipe as mp
-import pyttsx3
 import threading
 import time
-
-# ========== Pyttsx3 Setup ==========
-
-# Initialize pyttsx3 engine globally (once)
-engine = pyttsx3.init()
-
-# Thread-safe speak function
-def speak(text):
-    def _speak():
-        engine.say(text)
-        engine.runAndWait()
-    threading.Thread(target=_speak, daemon=True).start()
-
-# Last time speech was triggered
-last_speak_time = 0
-
-def should_speak(interval=5):
-    global last_speak_time
-    current_time = time.time()
-    if current_time - last_speak_time > interval:
-        last_speak_time = current_time
-        return True
-    return False
 
 
 # Initializing mediapipe pose class.
@@ -71,9 +47,7 @@ def detectPose(image, pose, display=True):
             landmarks.append((int(landmark.x * width), int(landmark.y * height),
                               (landmark.z * width)))
             
-        # === Trigger speech only when landmarks are detected ===
-        if should_speak(interval=10):  # Limit speech frequency
-            speak("Pose detected successfully")
+    
 
     # Check if the original input image and the resultant image are specified to be displayed.
     if display:
