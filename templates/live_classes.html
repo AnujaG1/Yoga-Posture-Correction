@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Live Yoga Classes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f9f9;
+            color: #333;
+            padding: 20px;
+        }
+
+     
+        
+        .page-header {
+            text-align: center;
+            margin: 40px 0 20px;
+        }
+
+        .page-header h2 {
+            font-size: 36px;
+            color: #006666;
+        }
+
+        .filter-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        select {
+            padding: 10px 15px;
+            font-size: 16px;
+            border: 2px solid #008080;
+            border-radius: 8px;
+            background-color: #e0f7f7;
+            color: #004d4d;
+        }
+
+        .join-button {
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #00b3b3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .join-button:hover {
+            background-color: #007777;
+        }
+
+        .video-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            padding: 10px 0;
+        }
+
+        .video-card {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+        }
+
+        iframe {
+            width: 100%;
+            height: 200px;
+            border: none;
+        }
+
+        .video-title {
+            padding: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #004d4d;
+        }
+
+        @media (max-width: 400px) {
+            iframe {
+                height: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+
+    <!-- Page Heading -->
+    <div class="page-header">
+        <h2>Join Our Live Yoga Sessions</h2>
+        <p>Practice yoga with expert instructors from YouTube or join our Zoom class live!</p>
+    </div>
+
+    <!-- Filter & Zoom Button -->
+    <div class="filter-section">
+        <select>
+            <option value="all">All Sessions</option>
+            <option value="morning">Morning Yoga</option>
+            <option value="beginner">Beginner Yoga</option>
+            <option value="stress">Stress Relief</option>
+            <option value="flexibility">Flexibility Boost</option>
+        </select>
+
+        <button class="join-button" onclick="window.open('https://zoom.us/j/1234567890', '_blank')">Join Live Zoom Class</button>
+    </div>
+
+    <!-- Videos Section -->
+    <div class="video-container">
+        <div class="video-card">
+            <iframe src="https://www.youtube.com/embed/v7AYKMP6rOE" allowfullscreen></iframe>
+            <div class="video-title">15 Min Daily Yoga for Beginners</div>
+        </div>
+        <div class="video-card">
+            <iframe src="https://www.youtube.com/embed/4pKly2JojMw" allowfullscreen></iframe>
+            <div class="video-title">Yoga for Anxiety and Stress</div>
+        </div>
+        <div class="video-card">
+            <iframe src="https://www.youtube.com/embed/sTANio_2E0Q" allowfullscreen></iframe>
+            <div class="video-title">Full Body Yoga Stretch | 30 Min</div>
+        </div>
+        <div class="video-card">
+            <iframe src="https://www.youtube.com/embed/7kgZnJqzNaU" allowfullscreen></iframe>
+            <div class="video-title">Yoga for Weight Loss</div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin: 30px;">
+        <a href="{{ url_for('index') }}" class="back-btn">← Back to Home</a>
+    </div>
+</body>
+</html>
