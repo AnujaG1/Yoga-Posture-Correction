@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Response, request, redirect, url_for, flash
+from flask import Flask, render_template, Response, request, redirect, url_for, flash, jsonify
 import cv2
 import datetime, time
 import os
