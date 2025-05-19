@@ -142,13 +142,11 @@ def classifyPose(landmarks):
         for joint, (min_angle, max_angle) in expected.items():
             if min_angle <= angles[joint] <= max_angle:
                 match_count += 1
-        if match_count > max_matches and match_count >= len(expected) * 0.7:  # 70% match threshold
+        if match_count > max_matches and match_count >= len(expected) * 0.85:  # 70% match threshold
             best_match = pose
             max_matches = match_count
 
     return best_match, angles
-
-
 
 
 
