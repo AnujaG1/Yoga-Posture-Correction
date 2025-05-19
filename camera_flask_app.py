@@ -129,6 +129,8 @@ def gen_frames():
 
 
 # ROUTES
+
+# ROUTES
 @app.route('/')
 def index():
     return render_template('index1.html')
@@ -141,10 +143,6 @@ def index1():
 def demo():
     return render_template('demo.html')
 
-@app.route('/contact')
-def contact():
-    return render_template('contact.html')
-
 @app.route('/about')
 def about():
     return render_template('about.html')
@@ -153,16 +151,24 @@ def about():
 def blog():
     return render_template('blog.html')
 
+@app.route("/contact")
+def contact():
+    return render_template("contact.html")
+
+@app.route("/live_classes")
+def live_classes():
+    return render_template("live_classes.html")
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        username = request.form['username']
-        email = request.form['email']
-        password = request.form['password']
-        age = request.form['age']
-        weight = request.form['weight']
-        experience = request.form['experience']
-
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        age = request.form.get('age')
+        weight = request.form.get('weight')
+        experience = request.form.get('experience')
+        # Log user data (can be saved to database later)
         print("Signup Data Received:")
         print(f"Username: {username}")
         print(f"Email: {email}")
@@ -170,54 +176,85 @@ def signup():
         print(f"Age: {age}")
         print(f"Weight: {weight} kg")
         print(f"Yoga Experience Level: {experience}")
-
         flash('Signup successful!')
-        return redirect(url_for('index1'))
-
+        return render_template('index1.html')
     return render_template('signup.html')
+
+@app.route('/submit_contact', methods=['POST'])
+def submit_contact():
+    name = request.form.get('name')
+    email = request.form.get('email')
+    message = request.form.get('message')
+    print(f"Contact received: {name}, {email}, {message}")
+    return render_template('thank_you.html', name=name)
 
 @app.route('/video_feed')
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/chatbot', methods=['POST'])
+def chatbot():
+    user_message = request.json.get("message", "").lower()
+    responses = {
+        "what is yoga": "Yoga is a physical, mental, and spiritual practice that originated in ancient India.",
+        "benefits of yoga": "Yoga improves flexibility, builds strength, reduces stress, and boosts mental clarity.",
+        "how often should I do yoga": "Even 10-20 minutes daily can be beneficial!",
+        "what's the best pose for beginners": "The Mountain Pose and Child’s Pose are great for beginners.",
+        "namaste": "Namaste! How can I help you with yoga today?",
+    }
+    reply = responses.get(user_message.strip(), "I'm still learning! Please ask something else about yoga.")
+    return jsonify({"reply": reply})
+
 @app.route('/requests', methods=['POST', 'GET'])
 def tasks():
-    global camera, capture, grey, neg, face, rec, switch, out
+    global switch, camera, capture, grey, neg, face, rec, out
     if request.method == 'POST':
         if request.form.get('click') == 'Capture':
             capture = True
         elif request.form.get('grey') == 'Grey':
             grey = not grey
         elif request.form.get('open') == 'Open':
-            neg = not neg  # Not used
+            neg = not neg
         elif request.form.get('face') == 'Face Only':
             face = not face
             if face:
-                time.sleep(2)
+                time.sleep(4)
         elif request.form.get('start') == 'Stop/Start':
             if switch:
-                camera.release()
                 switch = False
+                if camera is not None:
+                    camera.release()
+                    camera = None
             else:
-                index = get_working_camera_index()
-                camera = cv2.VideoCapture(index)
                 switch = True
+                camera = cv2.VideoCapture(0)
+                if not camera.isOpened():
+                    print("Error: Could not open camera.")
+                    switch = False
+                    camera = None
+                    flash('Failed to open camera!')
+                    return render_template('index1.html')
+                camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+                camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 750)
         elif request.form.get('rec') == 'Start/Stop Recording':
             rec = not rec
             if rec:
                 now = datetime.datetime.now()
-                filename = f'vid_{now.strftime("%Y%m%d_%H%M%S")}.avi'
                 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-                out = cv2.VideoWriter(filename, fourcc, 20.0, (640, 480))
-                thread = Thread(target=record, args=[out])
+                out = cv2.VideoWriter(f'vid_{now.strftime("%Y%m%d_%H%M%S")}.avi', fourcc, 20.0, (1280, 750))
+                thread = Thread(target=record, args=[out,])
                 thread.start()
-            else:
+            elif out is not None:
                 out.release()
-    return render_template('index.html')
+                out = None
+    return render_template('index1.html')
 
 if __name__ == '__main__':
     try:
         app.run(debug=True)
     finally:
-        camera.release()
+        if camera is not None:
+            camera.release()
+        if out is not None:
+            out.release()
         cv2.destroyAllWindows()
