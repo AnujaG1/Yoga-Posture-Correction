@@ -1,14 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Practise</title>
-    <link rel="stylesheet" href="/static/stylep.css"> <!-- Updated link -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/fontawesome.min.css">
-</head>
-<body>
-    <div class="container"></div>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
+        <link rel="stylesheet" href="/static/style.css">
+        <title>Practise Yoga</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            body {
+                background-color: #f0f9f9;
+                color: #333;
+                padding: 20px;
+            }
+
+            .page-header {
+                text-align: center;
+                margin: 40px 0 20px;
+            }
+
+            .page-header h2 {
+                font-size: 36px;
+                color: #006666;
+            }
+
+            .filter-section {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 15px;
+                margin: 20px 0;
+                flex-wrap: wrap;
+            }
+
+            select {
+                padding: 10px 15px;
+                font-size: 16px;
+                border: 2px solid #008080;
+                border-radius: 8px;
+                background-color: #e0f7f7;
+                color: #004d4d;
+            }
+
+            .join-button {
+                padding: 12px 25px;
+                font-size: 16px;
+                font-weight: bold;
+                background-color: #00b3b3;
+                color: white;
+                border: none;
+            }
+        </style>
+    </head>
+   <body>
+        <div class="video container">
+            <img src="{{ url_for('video_stream') }}" width="100%">
+        </div>
+
+   </body>
+    
 </html>

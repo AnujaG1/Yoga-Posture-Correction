@@ -20,6 +20,7 @@ face = False
 switch = True
 rec = False
 rec_frame = None
+out=None
 
 # Make shots directory to save pics
 os.makedirs('./shots', exist_ok=True)
@@ -90,7 +91,7 @@ def gen_frames():
         if face:
             frame = detect_face(frame)
         if grey:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
 
         frame, landmarks = detectPose(frame, pose_video, display=False)
@@ -190,6 +191,10 @@ def submit_contact():
 
 @app.route('/video_feed')
 def video_feed():
+    return render_template('practise.html')  # uses this template
+
+@app.route('/video_stream')
+def video_stream():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/chatbot', methods=['POST'])
@@ -227,21 +232,21 @@ def tasks():
                     camera = None
             else:
                 switch = True
-                camera = cv2.VideoCapture(0)
+                camera = cv2.VideoCapture(get_working_camera_index())
                 if not camera.isOpened():
                     print("Error: Could not open camera.")
                     switch = False
                     camera = None
                     flash('Failed to open camera!')
                     return render_template('index1.html')
-                camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-                camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 750)
+                camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+                camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
         elif request.form.get('rec') == 'Start/Stop Recording':
             rec = not rec
             if rec:
                 now = datetime.datetime.now()
                 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-                out = cv2.VideoWriter(f'vid_{now.strftime("%Y%m%d_%H%M%S")}.avi', fourcc, 20.0, (1280, 750))
+                out = cv2.VideoWriter(f'vid_{now.strftime("%Y%m%d_%H%M%S")}.avi', fourcc, 20.0, (1920, 1080))
                 thread = Thread(target=record, args=[out,])
                 thread.start()
             elif out is not None:
@@ -252,6 +257,8 @@ def tasks():
 if __name__ == '__main__':
     try:
         app.run(debug=True)
+    except Exception as e:
+        print("Exception occurred:", e)
     finally:
         if camera is not None:
             camera.release()
