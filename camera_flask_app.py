@@ -91,7 +91,7 @@ def gen_frames():
         if face:
             frame = detect_face(frame)
         if grey:
-            # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
 
         frame, landmarks = detectPose(frame, pose_video, display=False)
